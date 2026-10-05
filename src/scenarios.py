@@ -147,14 +147,12 @@ _SCENARIOS: Dict[str, Tuple[List[Cone], CarPose]] = {
     "21": (   
         [
             Cone(x=0.5, y=2.0, color=1), Cone(x=1.2, y=4.5, color=1), Cone(x=2.3, y=5.8, color=1),
-            Cone(x=2.5, y=2.0, color=0), Cone(x=2.9, y=3.5, color=0),
         ],
         CarPose(x=1.5, y=0.0, yaw=1.57),
     ),  
 
     "22": (
         [
-            Cone(x=3.5, y=2.0, color=1), Cone(x=2.4, y=4.3, color=1),
             Cone(x=5.5, y=2.0, color=0), Cone(x=4.8, y=4.5, color=0), Cone(x=3.7, y=5.8, color=0),
         ],
         CarPose(x=4.5, y=0.0, yaw=1.57),
@@ -171,7 +169,7 @@ _SCENARIOS: Dict[str, Tuple[List[Cone], CarPose]] = {
     "24": (  
         [
             Cone(x=0.5, y=1.5, color=1), Cone(x=0.5, y=4.5, color=1), Cone(x=4.0, y=5.0, color=1),
-            Cone(x=2.5, y=1.5, color=0),
+            
         ],
         CarPose(x=1.5, y=0.0, yaw=1.57),
 
