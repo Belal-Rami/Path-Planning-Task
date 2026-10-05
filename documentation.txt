@@ -1,0 +1,3 @@
+I took the whole problem step by step, there were some apparent problems that I saw that iI kept building on starting with the most simple solutions and most basic problems. The solution first sorts the cones into blue and yellow cones into different lists.
+
+The solutions
