@@ -1,23 +1,38 @@
 I approached the problem step by step, starting with the simplest cases and building on them as I found problems that needed to be solved.
 
-The solution first separates the cones into blue and yellow lists and sorts each list by distance from the car. The starting point is the car's position, and I also take the yaw into account. The yaw is converted into x and y components using trigonometry, and a point 1 meter in front of the car is added to the path. This makes the path start in the direction the car is facing, while smoothing later turns it into a gradual bend.
+The solution first separates the cones into blue and yellow lists and sorts each list by distance from the car. The starting point is the car's position, and I also take the yaw into account.
+The yaw is converted into x and y components using trigonometry, and a point 1 meter in front of the car is added to the path. 
+This makes the path start in the direction the car is facing, while smoothing later turns it into a gradual bend.
 
 When there is an equal number of cones on both sides, the midpoint of each blue and yellow pair is added to the path.
 
-To handle missing cones, I first implemented the single-cone case. The color of the cone determines which side the car should pass it from, and I assumed a minimum safe distance of 0.5 meters. After the path is created, I check every path point against every cone. If a point is too close, I calculate the direction from the cone to the point, normalize it, and move the point to the edge of the safe circle around the cone.
+To handle missing cones, I first implemented the single-cone case. The color of the cone determines which side the car should pass it from, and I assumed a minimum safe distance of 0.5 meters. 
+After the path is created, I check every path point against every cone. If a point is too close, I calculate the direction from the cone to the point, normalize it, and move the point to the edge of the safe circle around the cone.
 
-I initially handled the side of the cone by taking the last path point, finding the line to the cone, and using its perpendicular to create an offset on the correct side. This worked, but sometimes created unnecessarily long or messy paths.
+I initially handled the side of the cone by taking the last path point, finding the line to the cone, and using its perpendicular to create an offset on the correct side. 
+This worked, but sometimes created unnecessarily long or messy paths.
 
-I then added linear interpolation. This ensures that the distance between consecutive path points is no more than 0.5 meters and also gives the smoothing algorithm more points to work with. Smoothing averages each point with its two neighbors three times while keeping the first and last points fixed. The order is interpolation, smoothing, then inflation. Inflation has to be last because smoothing can pull the path closer to the cones.
+I then added linear interpolation. This ensures that the distance between consecutive path points is no more than 0.5 meters and also gives the smoothing algorithm more points to work with. 
+Smoothing averages each point with its two neighbors three times while keeping the first and last points fixed. 
+The order is interpolation, smoothing, then inflation. Inflation has to be last because smoothing can pull the path closer to the cones.
 
-For missing cones, I reused the same offset logic instead of creating virtual cones. A shifted point from a real cone is effectively the same as the midpoint between that cone and a suitable virtual cone, so creating the virtual cone would only add an unnecessary step.
+For missing cones, I reused the same offset logic instead of creating virtual cones. A shifted point from a real cone is effectively the same as the midpoint between that cone and a suitable virtual cone, 
+so creating the virtual cone would only add an unnecessary step.
 
-The side with fewer cones is processed first. Each cone looks for the nearest cone of the opposite color, and the two are treated as a pair. Their midpoint is added to the path. Any cones left over on the longer side are treated as detached cones. I did not use a fixed track width for pairing because the track limits are not necessarily the same throughout the scenario.
+The side with fewer cones is processed first. Each cone looks for the nearest cone of the opposite color, and the two are treated as a pair. Their midpoint is added to the path. 
+Any cones left over on the longer side are treated as detached cones. I did not use a fixed track width for pairing because the track limits are not necessarily the same throughout the scenario.
 
-For detached cones, the direction is taken from the neighboring cone of the same color. The last cone uses the direction from the previous cone. The cone is then shifted 1 meter sideways, to the right for blue and to the left for yellow, since the center of the track is on the opposite side of each cone. These shifted points, together with the car position and the point 1 meter ahead, are then interpolated, smoothed, and inflated.
+For detached cones, the direction is taken from the neighboring cone of the same color. The last cone uses the direction from the previous cone. The cone is then shifted 1 meter sideways, 
+to the right for blue and to the left for yellow, since the center of the track is on the opposite side of each cone. These shifted points, together with the car position and the point 1 meter ahead, are then interpolated, 
+smoothed, and inflated.
 
-If there is only one cone, there is no neighboring cone to determine the direction, so the line from the car to the cone is used. The same logic also works when only some cones are missing; for example, with three blue and two yellow cones, two pairs are created and the remaining blue cone is treated as detached.
+If there is only one cone, there is no neighboring cone to determine the direction, so the line from the car to the cone is used. The same logic also works when only some cones are missing; for example, 
+with three blue and two yellow cones, two pairs are created and the remaining blue cone is treated as detached.
 
-I chose this approach because it was the simplest way to extend the solution I already had. The offset logic was already implemented for the single-cone case, so the same code could be reused for missing cones without adding a separate virtual-cone step.
+I chose this approach because it was the simplest way to extend the solution I already had. The offset logic was already implemented for the single-cone case, 
+so the same code could be reused for missing cones without adding a separate virtual-cone step.
 
-There are still some limitations. The missing side is estimated using a fixed 1 meter shift, so the result depends on the assumed track width. The direction of a detached cone comes from its neighboring cones, which can cause problems at sharp bends. Nearest-neighbor pairing can also match the wrong cones in tight turns. Finally, inflation only checks the distance from a cone and does not consider which side of the cone the path should be on. This can sometimes push points to the wrong side or create a zigzag, and it can also make the distance between consecutive points greater than 0.5 meters.
+There are still some limitations. The missing side is estimated using a fixed 1 meter shift, so the result depends on the assumed track width. T
+he direction of a detached cone comes from its neighboring cones, which can cause problems at sharp bends. Nearest-neighbor pairing can also match the wrong cones in tight turns.
+Finally, inflation only checks the distance from a cone and does not consider which side of the cone the path should be on. 
+This can sometimes push points to the wrong side or create a zigzag, and it can also make the distance between consecutive points greater than 0.5 meters.
